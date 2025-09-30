@@ -117,7 +117,7 @@ param_distribs = {
 np.random.seed(42)
 svr_reg = SVR(kernel="linear")
 
-"""# Grid Search
+# Grid Search
 grid_search = GridSearchCV(
     svr_reg,
     param_grid,
@@ -141,7 +141,7 @@ print("Test RMSE: ", test_rmse)
 # Best params: {'C': 30000, 'epsilon': 3.0}
 # Best RMSE: 69000.03541165015
 # Test RMSE:  75125.31555377475
-"""
+
 # Randomized Search
 
 rnd_search = RandomizedSearchCV(
