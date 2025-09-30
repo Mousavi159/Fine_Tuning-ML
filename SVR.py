@@ -99,64 +99,73 @@ full_pipeline = ColumnTransformer([
     ("cat", cat_pipeline, cat_attribs),
 ])
 
-X_test_prepared = full_pipeline.fit_transform(X_test)
-
-
-# Support Vector Machine Regressor First model
-
-np.random.seed(42)
-
-# Svr linear classifier
-svr_lin = SVR(kernel='linear', C=6000, epsilon=4.0)
-svr_lin.fit(X_test_prepared, y_test)
-
-#Predict
-lin_predictions = svr_lin.predict(X_test_prepared)
-
-scores = cross_val_score(svr_lin, X_test_prepared, y_test,
-                         scoring="neg_mean_squared_error", cv=5)
-tree_rmse_scores = np.sqrt(-scores)
+X_train_prepared = full_pipeline.fit_transform(X_train)
+X_test_prepared = full_pipeline.transform(X_test)
 
 #Grid search
-param_grid = [
-    {"kernel": ["linear"],
-     "C": [6000, 12000, 30000, 350000, 400000],
-     "epsilon": [0.1, 0.3, 1.0, 3.0, 4.0]}
-]
+param_grid = {
+    "C": [6000, 12000, 30000, 350000, 400000],
+    "epsilon": [0.1, 0.3, 1.0, 3.0, 4.0]
+}
 
-grid_search = GridSearchCV(SVR(), param_grid, cv=5,
-                           scoring="neg_mean_squared_error",
-                           verbose=2)
-grid_search.fit(X_test_prepared, y_test)
+
+np.random.seed(42)
+svr_reg = SVR(kernel="linear")
+
+# Grid Search
+grid_search = GridSearchCV(
+    svr_reg,
+    param_grid,
+    cv=5,
+    scoring="neg_mean_squared_error",
+    verbose=2
+)
+
+grid_search.fit(X_train_prepared, y_train)
 
 print("Best params:", grid_search.best_params_)
 print("Best RMSE:", np.sqrt(-grid_search.best_score_))
 
-#Best params: {'C': 6000, 'epsilon': 4.0, 'kernel': 'linear'} for grid search
-#Best RMSE: 76901.91494848952
+#Test RMSE
+best_svr = grid_search.best_estimator_
+y_pred = best_svr.predict(X_test_prepared)
+test_rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+print("Test RMSE: ", test_rmse)
 
-#Randomize search
+# Grid Search
+# Best params: {'C': 30000, 'epsilon': 3.0}
+# Best RMSE: 69000.03541165015
+# Test RMSE:  75125.31555377475
 
-param_distribs = [
-    {"kernel": ["linear"],
-     "C": [6000, 12000, 30000, 350000, 400000],
-     "epsilon": [0.1, 0.3, 1.0, 3.0, 4.0]}
-]
+# Randomized Search
 
-svr_reg = SVR()  # No random_state
 rnd_search = RandomizedSearchCV(
     svr_reg,
-    param_distributions=param_distribs,
+    param_distributions=param_grid,
     n_iter=10,
     cv=5,
     scoring='neg_mean_squared_error',
     random_state=42
 )
 
-rnd_search.fit(X_test_prepared, y_test)
+rnd_search.fit(X_train_prepared, y_train)
 
 cvres = rnd_search.cv_results_
 for mean_score, params in zip(cvres["mean_test_score"], cvres["params"]):
     print(np.sqrt(-mean_score), params)
 
-#76902.7515888119 {'kernel': 'linear', 'epsilon': 0.3, 'C': 6000} random
+print("Best Parameter: ", rnd_search.best_estimator_)
+print()
+
+#Test Prediction
+best_rnd_svr = rnd_search.best_estimator_
+y_rnd_pred = best_rnd_svr.predict(X_test_prepared)
+
+# Test RMSE
+test_rnd_rmse = np.sqrt(mean_squared_error(y_test, y_rnd_pred))
+print("Test RMSE: ", test_rnd_rmse)
+
+# Randomized search
+# Best Parameter:  SVR(C=30000, epsilon=3.0, kernel='linear')
+# 69000.03541165015 {'epsilon': 3.0, 'C': 30000}
+# Test RMSE:  75125.31555377475
