@@ -18,7 +18,8 @@ import seaborn as sns
 
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import RandomizedSearchCV
-from scipy.stats import randint
+from scipy.stats import randint, uniform
+import random
 
 
     
@@ -107,12 +108,16 @@ param_grid = {
     "C": [6000, 12000, 30000, 350000, 400000],
     "epsilon": [0.1, 0.3, 1.0, 3.0, 4.0]
 }
+param_distribs = {
+    "C": randint(low=100, high=30000),
+    "epsilon": uniform(loc=0, scale=4)
+}
 
 
 np.random.seed(42)
 svr_reg = SVR(kernel="linear")
 
-# Grid Search
+"""# Grid Search
 grid_search = GridSearchCV(
     svr_reg,
     param_grid,
@@ -136,12 +141,12 @@ print("Test RMSE: ", test_rmse)
 # Best params: {'C': 30000, 'epsilon': 3.0}
 # Best RMSE: 69000.03541165015
 # Test RMSE:  75125.31555377475
-
+"""
 # Randomized Search
 
 rnd_search = RandomizedSearchCV(
     svr_reg,
-    param_distributions=param_grid,
+    param_distributions=param_distribs,
     n_iter=10,
     cv=5,
     scoring='neg_mean_squared_error',
@@ -166,6 +171,6 @@ test_rnd_rmse = np.sqrt(mean_squared_error(y_test, y_rnd_pred))
 print("Test RMSE: ", test_rnd_rmse)
 
 # Randomized search
-# Best Parameter:  SVR(C=30000, epsilon=3.0, kernel='linear')
-# 69000.03541165015 {'epsilon': 3.0, 'C': 30000}
-# Test RMSE:  75125.31555377475
+# Best Parameter:  SVR(C=28120, epsilon=np.float64(2.404460046972835), kernel='linear')
+# 69000.03453662695 {'C': 28120, 'epsilon': np.float64(2.404460046972835)}
+# Test RMSE:  75126.47467641844

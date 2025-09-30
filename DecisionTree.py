@@ -109,6 +109,12 @@ param_grid = {
     "min_samples_leaf": [1, 2, 4, 6, 10],
     "max_features": [None, "sqrt", "log2"]
 }
+param_distribs = {
+    "max_depth": randint(low=1, high=200),
+    "min_samples_split": randint(low=1, high=25),
+    "min_samples_leaf": randint(low=1, high=10),
+    "max_features": [None, "sqrt", "log2"]
+}
 
 tree_reg = DecisionTreeRegressor(random_state=42)
 grid_search = GridSearchCV(
@@ -139,7 +145,7 @@ print("Test RMSE: ", test_rmse)
 
 rnd_search = RandomizedSearchCV(
     tree_reg,
-    param_distributions=param_grid,
+    param_distributions=param_distribs,
     n_iter=10,
     cv=5,
     scoring='neg_mean_squared_error',
@@ -163,6 +169,6 @@ y_rnd_pred = best_rnd_tree.predict(X_test_prepared)
 test_rnd_rmse = np.sqrt(mean_squared_error(y_test, y_rnd_pred))
 print("Test RMSE: ", test_rnd_rmse)
 
-# Best Parameter:  DecisionTreeRegressor(max_depth=10, min_samples_leaf=10, random_state=42)
-# CV RMSE:  58923.61092011712 Params {'min_samples_split': 2, 'min_samples_leaf': 10, 'max_features': None, 'max_depth': 10}
-# Test RMSE:  59934.706056014074
+# Best Parameter:  DecisionTreeRegressor(max_depth=103, min_samples_leaf=8, min_samples_split=21,random_state=42)
+# CV RMSE:  59587.02526951459 Params {'max_depth': 103, 'max_features': None, 'min_samples_leaf': 8, 'min_samples_split': 21}
+# Test RMSE:  59694.70460735064

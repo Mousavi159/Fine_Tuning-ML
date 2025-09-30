@@ -112,6 +112,9 @@ ridge = Ridge()
 param_grid = {
     "alpha": [0.1, 1.0, 10.0, 100.0, 500.0]
 }
+param_distribs = {
+    "alpha": randint(low=1, high=500)
+}
 
 # Grid Search with 5-fold CV, using RMSE
 grid_search = GridSearchCV(
@@ -149,10 +152,10 @@ y_pred = best_ridge.predict(X_test_prepared)
 # RMSE on test set
 test_rmse = np.sqrt(mean_squared_error(y_test, y_pred))
 print("Test RMSE:", test_rmse)
- 
+
 rnd_search = RandomizedSearchCV(
     ridge,
-    param_distributions=param_grid,
+    param_distributions=param_distribs,
     n_iter=10,
     cv=5,
     scoring='neg_mean_squared_error',
@@ -177,6 +180,6 @@ y_pred = best_ridge.predict(X_test_prepared)
 test_rmse = np.sqrt(mean_squared_error(y_test, y_pred))
 print("Test RMSE:", test_rmse)
 
-#Best alpha: {'alpha': 1.0}
-#Best CV RMSE: 67865.56099114478 Randomized search for train set
-#Test RMSE: 72710.70743953051 Randomized search for test set
+#Best alpha: {'alpha': 21}
+#Best CV RMSE: 67874.03519725554 Randomized search for train set
+#Test RMSE: 72738.65568349106 Randomized search for test set
