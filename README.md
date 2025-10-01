@@ -27,4 +27,4 @@ The repository includes plots such as:
 1. Clone this repository  
    ```bash
    git clone https://github.com/your-username/your-repo.git
-   cd your-repo
+   cd Fine_Tuning-ML
