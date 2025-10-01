@@ -19,6 +19,8 @@ import seaborn as sns
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import RandomizedSearchCV
 from scipy.stats import randint
+import joblib
+
 
 rooms_ix, bedrooms_ix, population_ix, households_ix = 3, 4, 5, 6
 class Second_transformer(BaseEstimator, TransformerMixin):
@@ -124,8 +126,8 @@ print("Best CV RMSE:", np.sqrt(-grid_search.best_score_))
 
 # Test RMSE
 best_forest = grid_search.best_estimator_
-y_pred = best_forest.predict(X_test_prepared)
-test_rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+y_grid_pred = best_forest.predict(X_test_prepared)
+test_rmse = np.sqrt(mean_squared_error(y_test, y_grid_pred))
 print("Test RMSE:", test_rmse)
 
 #Best parameters: {'max_features': 8, 'n_estimators': 30}
@@ -160,13 +162,18 @@ print("Best parameters:", rnd_search.best_params_)
 print("Best CV RMSE:", np.sqrt(-rnd_search.best_score_))
 
 # Predictions on test set
-best_forest = rnd_search.best_estimator_
-y_pred = best_forest.predict(X_test_prepared)
+best_rnd_forest = rnd_search.best_estimator_
+y_rnd_pred = best_rnd_forest.predict(X_test_prepared)
 
 # Test RMSE
-test_rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+test_rmse = np.sqrt(mean_squared_error(y_test, y_rnd_pred))
 print("Test RMSE:", test_rmse)
 
 #Best parameters: {'max_features': 7, 'n_estimators': 180} 
 #Best CV RMSE: 49047.201092644886 Randdomized search for train set
 #Test RMSE: 48622.46702083209 Randomized search for test set
+
+# Save predicted and true values for visualization
+joblib.dump(best_rnd_forest, "best_forest.pkl")
+np.save("y_test.npy", y_test)
+np.save("y_pred.npy", y_rnd_pred)
